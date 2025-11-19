@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BryLoader - Reversible Link Shortener</title>
+    <!-- Load Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for aesthetic enhancements */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Dark background */
+            color: #c9d1d9;
+        }
+        .card {
+            background-color: #161b22; /* Slightly lighter card background */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+        }
+        .input-style {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+        }
+        .btn-primary {
+            background-color: #238636;
+            transition: background-color 0.15s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-color: #2ea043;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div id="app" class="card w-full max-w-lg p-6 rounded-xl space-y-6">
+        <h1 class="text-3xl font-bold text-center text-white">BryLoader: Reversible Shortener</h1>
+        <p class="text-center text-sm text-gray-400">Client-side encoding. No servers, no database. Same input always yields same output.</p>
+
+        <!-- Input Section -->
+        <div class="space-y-4">
+            <label for="longUrl" class="block text-sm font-medium text-gray-300">Enter Long URL:</label>
+            <input type="url" id="longUrl" placeholder="https://your-very-long-link.com/..."
+                   class="input-style w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500" required>
+            
+            <button id="shortenBtn" class="btn-primary w-full p-3 rounded-lg font-semibold shadow-md">
+                Generate BryLoader Link
+            </button>
+        </div>
+
+        <!-- Output Section -->
+        <div id="output" class="hidden space-y-4 p-4 bg-gray-700 bg-opacity-30 rounded-lg border border-green-600 border-opacity-50">
+            <label class="block text-sm font-medium text-gray-300">Your New BryLoader Link:</label>
+            <div class="flex">
+                <input type="text" id="shortLink" readonly
+                       class="input-style flex-grow p-3 rounded-l-lg text-sm truncate cursor-pointer"
+                       value="">
+                <button id="copyBtn" class="bg-gray-600 text-white p-3 rounded-r-lg hover:bg-gray-500 transition-colors flex-shrink-0">
+                    Copy
+                </button>
+            </div>
+            <p id="message" class="text-xs text-center text-green-400"></p>
+        </div>
+    </div>
+
+    <!-- Decoding/Redirecting Modal -->
+    <div id="redirectModal" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center p-4">
+        <div class="card p-8 rounded-xl space-y-4 text-center">
+            <h2 class="text-2xl font-bold text-green-400">Decoding & Redirecting...</h2>
+            <p class="text-lg" id="decodingMessage">Please wait while BryLoader securely decodes your link.</p>
+            <p class="text-sm text-gray-500">Destination: <code id="decodedUrlDisplay" class="text-green-500 break-all"></code></p>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Core Application Logic ---
+
+        // The secret key used for reversible obfuscation. 
+        // This MUST remain constant for the encoding/decoding process to be deterministic.
+        const SECRET_KEY = 79; 
+        const DELIMITER = '_';
+        
+        // --- FIX APPLIED HERE: Hardcoded the user's intended hosting domain ---
+        const DOMAIN_PREFIX = 'https://herjiberb.github.com/BryLoader?='; 
+        // --------------------------------------------------------------------
+
+        // Helper to encode a string using Base64 and then apply XOR obfuscation
+        function encode(url) {
+            // 1. Base64 encode the URL string
+            const b64 = btoa(url);
+
+            // 2. Apply XOR Obfuscation
+            const obfuscatedCodes = Array.from(b64).map(char => {
+                const code = char.charCodeAt(0);
+                // Simple XOR operation ensures reversibility
+                return code ^ SECRET_KEY;
+            });
+
+            // 3. Join the resulting numbers into a single string ID
+            return obfuscatedCodes.join(DELIMITER);
+        }
+
+        // Helper to decode the obfuscated string back to the original URL
+        function decode(encodedString) {
+            // 1. Split the string back into numerical codes
+            const obfuscatedCodes = encodedString.split(DELIMITER).map(Number);
+            
+            // 2. Apply XOR Obfuscation (same operation reverses the process)
+            const b64Chars = obfuscatedCodes.map(code => {
+                const charCode = code ^ SECRET_KEY;
+                // Check if charCode is valid printable ASCII
+                if (charCode < 32 || charCode > 126) {
+                     console.error('Invalid character code encountered during decoding:', charCode);
+                     throw new Error('Invalid code sequence.');
+                }
+                return String.fromCharCode(charCode);
+            });
+
+            // 3. Join characters and Base64 decode
+            const b64 = b64Chars.join('');
+            try {
+                return atob(b64);
+            } catch (e) {
+                console.error('Base64 decoding failed:', e);
+                return null; // Return null on failure
+            }
+        }
+
+        // --- UI Element References ---
+        const app = document.getElementById('app');
+        const longUrlInput = document.getElementById('longUrl');
+        const shortenBtn = document.getElementById('shortenBtn');
+        const outputDiv = document.getElementById('output');
+        const shortLinkInput = document.getElementById('shortLink');
+        const copyBtn = document.getElementById('copyBtn');
+        const messageP = document.getElementById('message');
+        const redirectModal = document.getElementById('redirectModal');
+        const decodedUrlDisplay = document.getElementById('decodedUrlDisplay');
+
+        // --- Event Listeners ---
+        
+        // Handle the Shorten Button Click
+        shortenBtn.addEventListener('click', () => {
+            const longUrl = longUrlInput.value.trim();
+            if (!longUrl) {
+                messageP.textContent = 'Please enter a valid URL.';
+                messageP.classList.remove('text-green-400', 'text-yellow-400');
+                messageP.classList.add('text-red-400');
+                outputDiv.classList.remove('hidden');
+                shortLinkInput.value = '';
+                return;
+            }
+
+            // Ensure the URL has a protocol for proper redirection later
+            const formattedUrl = longUrl.match(/^[a-zA-Z]+:\/\//) ? longUrl : 'http://' + longUrl;
+
+            try {
+                const encodedId = encode(formattedUrl);
+                // We use the hash (#) for client-side routing and to store the ID
+                const fullShortLink = DOMAIN_PREFIX + '#' + encodedId; 
+
+                shortLinkInput.value = fullShortLink;
+                outputDiv.classList.remove('hidden');
+                messageP.textContent = 'Link generated successfully! Now uses the correct domain.';
+                messageP.classList.remove('text-red-400', 'text-yellow-400');
+                messageP.classList.add('text-green-400');
+
+            } catch (e) {
+                console.error("Encoding failed:", e);
+                messageP.textContent = 'Error during encoding. Please check the URL format.';
+                messageP.classList.remove('text-green-400', 'text-yellow-400');
+                messageP.classList.add('text-red-400');
+            }
+        });
+
+        // Handle Copy Button Click
+        copyBtn.addEventListener('click', () => {
+            shortLinkInput.select();
+            document.execCommand('copy');
+            messageP.textContent = 'Link copied to clipboard!';
+            messageP.classList.remove('text-red-400', 'text-green-400');
+            messageP.classList.add('text-yellow-400');
+        });
+
+
+        // --- Initialization and Redirection Check ---
+
+        function handleRedirection() {
+            // Check if there is an encoded ID in the URL hash fragment
+            const hash = window.location.hash.substring(1); // Remove the leading '#'
+
+            if (hash) {
+                // An encoded ID is present, switch to decoding/redirecting mode
+                app.classList.add('hidden');
+                redirectModal.classList.remove('hidden');
+                redirectModal.classList.add('flex');
+
+                try {
+                    const originalUrl = decode(hash);
+
+                    if (originalUrl) {
+                        decodedUrlDisplay.textContent = originalUrl;
+                        document.getElementById('decodingMessage').textContent = 'Redirecting in 3 seconds...';
+
+                        // Use a short delay before redirecting
+                        setTimeout(() => {
+                            // Clear the hash to prevent loop on the same page
+                            window.history.pushState(null, null, window.location.pathname); 
+                            
+                            // Perform the actual redirection
+                            window.location.replace(originalUrl); 
+                        }, 3000); 
+                    } else {
+                        document.getElementById('decodingMessage').textContent = 'Error: Could not decode the link. The code is invalid or corrupted.';
+                        decodedUrlDisplay.textContent = 'Invalid Code';
+                    }
+                } catch (error) {
+                    console.error('Decoding failed:', error);
+                    document.getElementById('decodingMessage').textContent = 'Error: Failed to process the link due to a decoding error.';
+                    decodedUrlDisplay.textContent = 'Decoding Error';
+                }
+            } else {
+                // No encoded ID, show the main shortening interface
+                app.classList.remove('hidden');
+                redirectModal.classList.add('hidden');
+            }
+        }
+
+        // Run the redirection handler when the page loads
+        window.addEventListener('load', handleRedirection);
+        // Also handle cases where the hash changes without a full page reload (e.g., user hits back button)
+        window.addEventListener('hashchange', handleRedirection);
+
+    </script>
+</body>
+</html>
