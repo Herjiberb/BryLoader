@@ -3,71 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BryLoader - Reversible Link Shortener</title>
-    <!-- Load Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>BryLoader: The Chain Forger</title>
+    <!-- Use a simple, stark font and custom CSS -->
     <style>
-        /* Custom styles for aesthetic enhancements */
+        @import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;700;900&display=swap');
+
+        /* Theme Variables */
+        :root {
+            --color-dark-ash: #131313;
+            --color-bone-white-start: #f0f0f0;
+            --color-bone-white-end: #e0e0e0;
+            --color-blood-red: #9e0000; /* Deeper Red */
+            --color-blood-red-dark: #7a0000;
+            --color-text-dark: #333333;
+            --color-text-light: #ffffff;
+            --border-radius: 18px;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0d1117; /* Dark background */
-            color: #c9d1d9;
+            font-family: 'Gothic A1', sans-serif;
+            background-color: var(--color-dark-ash);
+            color: var(--color-text-dark);
+            /* Fullscreen & Centering */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100vw;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            background-image: radial-gradient(circle at center, #252525 1px, transparent 1px);
+            background-size: 40px 40px;
         }
-        .card {
-            background-color: #161b22; /* Slightly lighter card background */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+
+        /* Main Application Card (The "Tomb") */
+        #app {
+            background: linear-gradient(135deg, var(--color-bone-white-start), var(--color-bone-white-end));
+            width: 100%;
+            max-width: 550px;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.8), /* Deep primary shadow */
+                0 0 0 5px var(--color-blood-red); /* Bloody Border */
+            animation: fadeIn 1s ease-in-out;
+            margin: 40px 20px; /* Responsive margin */
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-align: center;
+            color: var(--color-blood-red-dark);
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.4);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #555;
+            font-size: 1rem;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        /* Tabs Styling */
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 3px solid var(--color-blood-red);
+        }
+
+        .tab-button {
+            flex-grow: 1;
+            padding: 12px 15px;
+            cursor: pointer;
+            background-color: #d8d8d8;
+            border: none;
+            color: var(--color-text-dark);
+            font-weight: 700;
+            transition: background-color 0.3s, color 0.3s;
+            text-transform: uppercase;
+        }
+
+        .tab-button:first-child { border-radius: 12px 0 0 0; }
+        .tab-button:last-child { border-radius: 0 12px 0 0; }
+
+        .tab-button.active {
+            background-color: var(--color-blood-red);
+            color: var(--color-text-light);
+            box-shadow: inset 0 -4px 0 var(--color-blood-red-dark);
+        }
+        
+        /* Input & Controls */
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--color-blood-red);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
         .input-style {
-            background-color: #0d1117;
-            border: 1px solid #30363d;
-            color: #c9d1d9;
+            width: 100%;
+            padding: 14px 15px;
+            border: 3px solid #ccc;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background-color: var(--color-bone-white-start);
+            color: var(--color-text-dark);
         }
+
+        .input-style:focus {
+            outline: none;
+            border-color: var(--color-blood-red);
+            box-shadow: 0 0 15px rgba(139, 0, 0, 0.6); /* Added dramatic glow */
+        }
+
         .btn-primary {
-            background-color: #238636;
-            transition: background-color 0.15s ease-in-out;
+            background-color: var(--color-blood-red);
+            color: var(--color-text-light);
+            padding: 14px;
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
+
         .btn-primary:hover {
-            background-color: #2ea043;
+            background-color: var(--color-blood-red-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(139, 0, 0, 0.4);
+        }
+        
+        .btn-copy {
+            background-color: #555;
+            color: white;
+            padding: 14px 18px;
+            border: none;
+            border-radius: 0 10px 10px 0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+        }
+
+        .btn-copy:hover {
+            background-color: #777;
+        }
+        
+        .flex-input-group {
+            display: flex;
+            width: 100%;
+        }
+
+        .flex-input-group .input-style {
+            border-radius: 10px 0 0 10px;
+        }
+        
+        /* Cryptkey/Password Styles */
+        .cryptkey-group {
+            margin-top: -5px;
+            margin-bottom: 25px;
+        }
+        .cryptkey-group label {
+            font-size: 0.9rem;
+            color: #666; /* Subdued color for optional field */
+            display: flex;
+            align-items: center;
+        }
+        .cryptkey-group input {
+            font-size: 1rem;
+            font-family: monospace;
+        }
+
+        /* Output & Message */
+        .output-box {
+            padding: 20px;
+            background-color: #fffafa; /* Very light bone background */
+            border: 3px solid var(--color-blood-red);
+            border-radius: var(--border-radius);
+            margin-top: 25px;
+        }
+
+        #message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 700;
+            display: none;
+        }
+
+        .msg-success { background-color: #e3ffe5; color: #1b5e20; border: 1px solid #1b5e20; }
+        .msg-error { background-color: #ffe3e3; color: var(--color-blood-red); border: 1px solid var(--color-blood-red); }
+        .msg-info { background-color: #ffffdd; color: #f9a825; border: 1px solid #f9a825; }
+
+        /* Decoding Modal (Redirect Screen) */
+        #redirectModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--color-dark-ash);
+            padding: 50px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: 0 0 0 8px var(--color-blood-red), 0 0 30px var(--color-blood-red-dark);
+            color: var(--color-text-light);
+            max-width: 90%;
+        }
+
+        .spinner {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid var(--color-blood-red);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #redirectDecodedUrlDisplay {
+            color: #ffcccc;
+            font-weight: 700;
+            word-break: break-all;
+            display: block;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px dashed var(--color-blood-red);
+            font-size: 0.9em;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <div id="app" class="card w-full max-w-lg p-6 rounded-xl space-y-6">
-        <h1 class="text-3xl font-bold text-center text-white">BryLoader: Reversible Shortener</h1>
-        <p class="text-center text-sm text-gray-400">Client-side encoding. No servers, no database. Same input always yields same output.</p>
+<body>
+    <div id="app">
+        <h1>BryLoader: The Chain Forger</h1>
+        <p class="subtitle">A reversible, client-side cryptographic link utility.</p>
 
-        <!-- Input Section -->
-        <div class="space-y-4">
-            <label for="longUrl" class="block text-sm font-medium text-gray-300">Enter Long URL:</label>
-            <input type="url" id="longUrl" placeholder="https://your-very-long-link.com/..."
-                   class="input-style w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500" required>
-            
-            <button id="shortenBtn" class="btn-primary w-full p-3 rounded-lg font-semibold shadow-md">
-                Generate BryLoader Link
-            </button>
+        <!-- Feature: Tabs for Shorten/Decode -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="shorten">FORGE CHAIN</button>
+            <button class="tab-button" data-tab="decode">BREAK CHAIN</button>
         </div>
 
-        <!-- Output Section -->
-        <div id="output" class="hidden space-y-4 p-4 bg-gray-700 bg-opacity-30 rounded-lg border border-green-600 border-opacity-50">
-            <label class="block text-sm font-medium text-gray-300">Your New BryLoader Link:</label>
-            <div class="flex">
-                <input type="text" id="shortLink" readonly
-                       class="input-style flex-grow p-3 rounded-l-lg text-sm truncate cursor-pointer"
-                       value="">
-                <button id="copyBtn" class="bg-gray-600 text-white p-3 rounded-r-lg hover:bg-gray-500 transition-colors flex-shrink-0">
-                    Copy
-                </button>
+        <!-- Tab Content: Shorten -->
+        <div id="shorten-tab" class="tab-content">
+            <div class="input-group">
+                <label for="longUrl">The Living Link (Destination URL):</label>
+                <input type="url" id="longUrl" placeholder="https://your-private-data.com/secret..." class="input-style" required>
             </div>
-            <p id="message" class="text-xs text-center text-green-400"></p>
+            
+            <!-- New Feature: Cryptkey -->
+            <div class="input-group cryptkey-group">
+                <label for="cryptKeyShorten">The Cryptkey (Optional Password):</label>
+                <input type="password" id="cryptKeyShorten" placeholder="Leave blank for an open link" class="input-style">
+            </div>
+            
+            <button id="shortenBtn" class="btn-primary">
+                FORGE THE ENCRYPTED CHAIN
+            </button>
+
+            <!-- Output Section -->
+            <div id="shortenOutput" class="output-box" style="display: none;">
+                <label>The Forsaken Chain (Short Link):</label>
+                <div class="flex-input-group">
+                    <input type="text" id="shortLink" readonly class="input-style" value="" style="flex-grow: 1;">
+                    <button id="copyBtn" class="btn-copy">
+                        Copy
+                    </button>
+                </div>
+            </div>
         </div>
+
+        <!-- Tab Content: Decode -->
+        <div id="decode-tab" class="tab-content" style="display: none;">
+            <div class="input-group">
+                <label for="shortUrlInput">The Forsaken Chain (Link or Encoded ID):</label>
+                <input type="text" id="shortUrlInput" placeholder="Paste the full link or the encoded ID here" class="input-style" required>
+            </div>
+            
+            <!-- New Feature: Cryptkey for Decoding -->
+            <div class="input-group cryptkey-group">
+                <label for="cryptKeyDecode">The Cryptkey (Password, if used for encoding):</label>
+                <input type="password" id="cryptKeyDecode" placeholder="Enter password if link is protected" class="input-style">
+            </div>
+
+            <button id="decodeBtn" class="btn-primary">
+                BREAK THE CHAIN & REVEAL DESTINATION
+            </button>
+
+            <!-- Decoding Output -->
+            <div id="decodeOutput" class="output-box" style="display: none;">
+                <label>The Living Link (Original URL):</label>
+                <code id="decodedResult" style="word-break: break-all; font-size: 1em;"></code>
+            </div>
+        </div>
+        
+        <!-- General Message Area -->
+        <p id="message" style="display: none;"></p>
     </div>
 
     <!-- Decoding/Redirecting Modal -->
-    <div id="redirectModal" class="fixed inset-0 bg-black bg-opacity-80 hidden items-center justify-center p-4">
-        <div class="card p-8 rounded-xl space-y-4 text-center">
-            <h2 class="text-2xl font-bold text-green-400">Decoding & Redirecting...</h2>
-            <p class="text-lg" id="decodingMessage">Please wait while BryLoader securely decodes your link.</p>
-            <p class="text-sm text-gray-500">Destination: <code id="decodedUrlDisplay" class="text-green-500 break-all"></code></p>
+    <div id="redirectModal">
+        <div class="modal-content">
+            <div class="spinner"></div>
+            <h2 style="font-size: 1.8rem; color: var(--color-blood-red);">SUMMONING THE DESTINATION...</h2>
+            <p id="decodingMessage" style="margin-top: 15px;">Attempting to decrypt the encoded path. Please hold.</p>
+            <p style="margin-top: 25px; font-size: 0.9em; font-weight: 700;">Decrypted Path Preview:</p>
+            <code id="redirectDecodedUrlDisplay"></code>
         </div>
     </div>
 
@@ -75,160 +350,266 @@
     <script>
         // --- Core Application Logic ---
 
-        // The secret key used for reversible obfuscation. 
-        // This MUST remain constant for the encoding/decoding process to be deterministic.
-        const SECRET_KEY = 79; 
+        // The base secret key for XOR obfuscation.
+        const BASE_SECRET_KEY = 79;
         const DELIMITER = '_';
         
-        // --- FIX APPLIED HERE: Hardcoded the user's intended hosting domain ---
+        // Host domain for link generation (This should be the address of the page itself)
         const DOMAIN_PREFIX = 'https://herjiberb.github.io/BryLoader?='; 
-        // --------------------------------------------------------------------
+        const HASH_DELIMITER = '#';
+
+        /**
+         * Simple, deterministic hash function for generating a key modifier from a password.
+         * The output is used to modify the BASE_SECRET_KEY.
+         */
+        function hashPassword(password) {
+            if (!password) return 0;
+            let hash = 0;
+            for (let i = 0; i < password.length; i++) {
+                hash = ((hash << 5) - hash) + password.charCodeAt(i);
+                hash |= 0; // Convert to 32bit integer
+            }
+            // Use a limited range for the modifier (0-255)
+            return Math.abs(hash) % 256;
+        }
+
+        /**
+         * Determines the final encryption/decryption key.
+         */
+        function getEncryptionKey(password) {
+            const modifier = hashPassword(password);
+            // XOR the base key with the modifier to create a new unique key
+            return BASE_SECRET_KEY ^ modifier; 
+        }
 
         // Helper to encode a string using Base64 and then apply XOR obfuscation
-        function encode(url) {
-            // 1. Base64 encode the URL string
+        function encode(url, password = "") {
+            const key = getEncryptionKey(password);
             const b64 = btoa(url);
-
-            // 2. Apply XOR Obfuscation
+            
             const obfuscatedCodes = Array.from(b64).map(char => {
                 const code = char.charCodeAt(0);
-                // Simple XOR operation ensures reversibility
-                return code ^ SECRET_KEY;
+                // Apply the unique key
+                return code ^ key;
             });
-
-            // 3. Join the resulting numbers into a single string ID
             return obfuscatedCodes.join(DELIMITER);
         }
 
         // Helper to decode the obfuscated string back to the original URL
-        function decode(encodedString) {
-            // 1. Split the string back into numerical codes
-            const obfuscatedCodes = encodedString.split(DELIMITER).map(Number);
+        function decode(encodedString, password = "") {
+            if (!encodedString || encodedString.trim() === '') {
+                throw new Error("Encoded string is empty.");
+            }
             
-            // 2. Apply XOR Obfuscation (same operation reverses the process)
+            const key = getEncryptionKey(password);
+            
+            // Clean the string (remove the prefix if it's a full URL)
+            let hashPart = encodedString.includes(HASH_DELIMITER) 
+                           ? encodedString.split(HASH_DELIMITER).pop()
+                           : encodedString;
+
+            const obfuscatedCodes = hashPart.split(DELIMITER).map(Number);
+            
+            if (obfuscatedCodes.some(isNaN)) {
+                 throw new Error('Invalid code sequence: contains non-numeric parts.');
+            }
+
             const b64Chars = obfuscatedCodes.map(code => {
-                const charCode = code ^ SECRET_KEY;
-                // Check if charCode is valid printable ASCII
-                if (charCode < 32 || charCode > 126) {
-                     console.error('Invalid character code encountered during decoding:', charCode);
-                     throw new Error('Invalid code sequence.');
-                }
+                // Decrypt using the unique key
+                const charCode = code ^ key;
                 return String.fromCharCode(charCode);
             });
 
-            // 3. Join characters and Base64 decode
             const b64 = b64Chars.join('');
+            
             try {
+                // If decoding fails, it often means the wrong key was used
                 return atob(b64);
             } catch (e) {
-                console.error('Base64 decoding failed:', e);
-                return null; // Return null on failure
+                console.error('Base64 decoding failed, likely wrong key:', e);
+                return null; 
             }
         }
-
+        
         // --- UI Element References ---
         const app = document.getElementById('app');
         const longUrlInput = document.getElementById('longUrl');
+        const cryptKeyShortenInput = document.getElementById('cryptKeyShorten');
         const shortenBtn = document.getElementById('shortenBtn');
-        const outputDiv = document.getElementById('output');
+        const shortenOutputDiv = document.getElementById('shortenOutput');
         const shortLinkInput = document.getElementById('shortLink');
         const copyBtn = document.getElementById('copyBtn');
         const messageP = document.getElementById('message');
         const redirectModal = document.getElementById('redirectModal');
-        const decodedUrlDisplay = document.getElementById('decodedUrlDisplay');
+        const redirectDecodedUrlDisplay = document.getElementById('redirectDecodedUrlDisplay');
+        const shortenTab = document.getElementById('shorten-tab');
+        const decodeTab = document.getElementById('decode-tab');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const shortUrlInput = document.getElementById('shortUrlInput');
+        const cryptKeyDecodeInput = document.getElementById('cryptKeyDecode');
+        const decodeBtn = document.getElementById('decodeBtn');
+        const decodeOutputDiv = document.getElementById('decodeOutput');
+        const decodedResult = document.getElementById('decodedResult');
+
+        // --- Helper Functions ---
+
+        /** Displays feedback message in the themed area. */
+        function showMessage(text, type) {
+            messageP.textContent = text;
+            messageP.style.display = 'block';
+            messageP.className = '';
+            messageP.classList.add('msg-' + type);
+        }
+
+        /** Hides the feedback message. */
+        function hideMessage() {
+            messageP.style.display = 'none';
+        }
+
+        /** Handles tab switching UI */
+        function switchTab(tabName) {
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-tab') === tabName) {
+                    btn.classList.add('active');
+                }
+            });
+
+            shortenTab.style.display = (tabName === 'shorten') ? 'block' : 'none';
+            decodeTab.style.display = (tabName === 'decode') ? 'block' : 'none';
+            hideMessage();
+        }
 
         // --- Event Listeners ---
         
+        // Tab switching
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+        });
+
         // Handle the Shorten Button Click
         shortenBtn.addEventListener('click', () => {
-            const longUrl = longUrlInput.value.trim();
+            hideMessage();
+            shortenOutputDiv.style.display = 'none';
+
+            let longUrl = longUrlInput.value.trim();
+            const password = cryptKeyShortenInput.value.trim();
+            
             if (!longUrl) {
-                messageP.textContent = 'Please enter a valid URL.';
-                messageP.classList.remove('text-green-400', 'text-yellow-400');
-                messageP.classList.add('text-red-400');
-                outputDiv.classList.remove('hidden');
-                shortLinkInput.value = '';
+                showMessage('The Living Link cannot be an empty grave. Enter a URL.', 'error');
                 return;
             }
 
-            // Ensure the URL has a protocol for proper redirection later
-            const formattedUrl = longUrl.match(/^[a-zA-Z]+:\/\//) ? longUrl : 'http://' + longUrl;
+            // Enhanced Validation: Ensure protocol for proper redirection
+            if (!longUrl.match(/^[a-zA-Z]+:\/\//)) {
+                showMessage('URL must start with a protocol (http:// or https://). Fixing now...', 'info');
+                longUrl = 'http://' + longUrl;
+            }
 
             try {
-                const encodedId = encode(formattedUrl);
-                // We use the hash (#) for client-side routing and to store the ID
-                const fullShortLink = DOMAIN_PREFIX + '#' + encodedId; 
+                const encodedId = encode(longUrl, password);
+                // Note: The key is NOT stored in the URL, making it a true secret password
+                const fullShortLink = DOMAIN_PREFIX + HASH_DELIMITER + encodedId; 
 
                 shortLinkInput.value = fullShortLink;
-                outputDiv.classList.remove('hidden');
-                messageP.textContent = 'Link generated successfully! Now uses the correct domain.';
-                messageP.classList.remove('text-red-400', 'text-yellow-400');
-                messageP.classList.add('text-green-400');
+                shortenOutputDiv.style.display = 'block';
+                
+                if (password) {
+                    showMessage('Chain forged with a Cryptkey! Remember the password to break it.', 'success');
+                } else {
+                    showMessage('Chain forged! Your open link is ready.', 'success');
+                }
 
             } catch (e) {
                 console.error("Encoding failed:", e);
-                messageP.textContent = 'Error during encoding. Please check the URL format.';
-                messageP.classList.remove('text-green-400', 'text-yellow-400');
-                messageP.classList.add('text-red-400');
+                showMessage('A spectral error occurred during forging the chain. Check the console.', 'error');
             }
         });
+        
+        // Handle Decode Button Click
+        decodeBtn.addEventListener('click', () => {
+            hideMessage();
+            decodeOutputDiv.style.display = 'none';
+            
+            const shortInput = shortUrlInput.value.trim();
+            const password = cryptKeyDecodeInput.value.trim();
+
+            if (!shortInput) {
+                showMessage('Enter the encoded link or ID to break the chain.', 'error');
+                return;
+            }
+            
+            try {
+                const originalUrl = decode(shortInput, password);
+                
+                if (originalUrl) {
+                    decodedResult.textContent = originalUrl;
+                    decodeOutputDiv.style.display = 'block';
+                    showMessage('The original path is revealed.', 'success');
+                } else {
+                    // This error is crucial if the password was wrong
+                    showMessage('Decryption failed: The Cryptkey is incorrect or the chain is corrupted.', 'error');
+                }
+            } catch (error) {
+                console.error('Decoding failed:', error);
+                showMessage('Decoding failed: Invalid link structure. Check the input.', 'error');
+            }
+        });
+
 
         // Handle Copy Button Click
         copyBtn.addEventListener('click', () => {
             shortLinkInput.select();
             document.execCommand('copy');
-            messageP.textContent = 'Link copied to clipboard!';
-            messageP.classList.remove('text-red-400', 'text-green-400');
-            messageP.classList.add('text-yellow-400');
+            showMessage('The link is copied to the shadow realm (clipboard).', 'info');
         });
 
 
         // --- Initialization and Redirection Check ---
 
         function handleRedirection() {
-            // Check if there is an encoded ID in the URL hash fragment
             const hash = window.location.hash.substring(1); // Remove the leading '#'
 
             if (hash) {
                 // An encoded ID is present, switch to decoding/redirecting mode
-                app.classList.add('hidden');
-                redirectModal.classList.remove('hidden');
-                redirectModal.classList.add('flex');
+                app.style.display = 'none';
+                redirectModal.style.display = 'flex';
+                
+                // *** IMPORTANT: Cannot redirect if a password was used, as the browser doesn't know it. ***
+                document.getElementById('decodingMessage').textContent = 'An encoded path was detected. Since this tool uses client-side encryption, if a Cryptkey (password) was used, you must manually break the chain by pasting the link into the DECODE tab.';
+                redirectDecodedUrlDisplay.textContent = 'Decryption requires manual input if a password was set.';
 
                 try {
-                    const originalUrl = decode(hash);
+                    // Try decoding with NO password first (for open links)
+                    const originalUrl = decode(hash, ""); 
 
                     if (originalUrl) {
-                        decodedUrlDisplay.textContent = originalUrl;
-                        document.getElementById('decodingMessage').textContent = 'Redirecting in 3 seconds...';
+                        redirectDecodedUrlDisplay.textContent = originalUrl;
+                        document.getElementById('decodingMessage').textContent = 'Successfully decrypted open chain. Redirecting in 3 seconds...';
 
                         // Use a short delay before redirecting
                         setTimeout(() => {
-                            // Clear the hash to prevent loop on the same page
                             window.history.pushState(null, null, window.location.pathname); 
-                            
-                            // Perform the actual redirection
                             window.location.replace(originalUrl); 
                         }, 3000); 
                     } else {
-                        document.getElementById('decodingMessage').textContent = 'Error: Could not decode the link. The code is invalid or corrupted.';
-                        decodedUrlDisplay.textContent = 'Invalid Code';
+                         // The modal stays open, prompting the user to go back and use the decode tab
+                         document.getElementById('decodingMessage').textContent = 'Decryption failed (Cryptkey likely required). Please go to the DECODE tab and enter the password.';
                     }
                 } catch (error) {
                     console.error('Decoding failed:', error);
-                    document.getElementById('decodingMessage').textContent = 'Error: Failed to process the link due to a decoding error.';
-                    decodedUrlDisplay.textContent = 'Decoding Error';
+                    document.getElementById('decodingMessage').textContent = 'Fatal Error: Could not process the encoded string.';
+                    redirectDecodedUrlDisplay.textContent = 'Decoding Error';
                 }
             } else {
                 // No encoded ID, show the main shortening interface
-                app.classList.remove('hidden');
-                redirectModal.classList.add('hidden');
+                app.style.display = 'block';
+                redirectModal.style.display = 'none';
             }
         }
 
         // Run the redirection handler when the page loads
         window.addEventListener('load', handleRedirection);
-        // Also handle cases where the hash changes without a full page reload (e.g., user hits back button)
         window.addEventListener('hashchange', handleRedirection);
 
     </script>
